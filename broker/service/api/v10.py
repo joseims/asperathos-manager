@@ -135,7 +135,7 @@ def submission_status(submission_id):
     this_status['visualizer_url'] = (submissions[submission_id].
                                  get_visualizer_url())
 
-    return {submission_id: this_status}
+    return this_status
 
 
 def submission_log(submission_id):
