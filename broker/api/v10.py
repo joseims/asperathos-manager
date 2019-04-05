@@ -16,11 +16,16 @@
 from broker.utils import api as u
 from broker.service.api import v10 as api
 from flask_cors import CORS
+from flask import jsonify
 
 rest = u.Rest('v10', __name__)
 
 CORS(rest, expose_headers='Authorization')
 
+@rest.post('/install_plugin')
+def install_plugin(data):
+    response, status = api.install_plugin(data)
+    return jsonify(response), status
 
 @rest.post('/submissions')
 def run_submission(data):

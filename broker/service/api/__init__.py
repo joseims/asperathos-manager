@@ -15,12 +15,14 @@
 
 import configparser
 import kubernetes as kube
-from broker.utils.logger import Log
+from broker.utils.logger import Log, configure_logging
 
 API_LOG = Log("APIv10", "logs/APIv10.log")
 CONFIG_PATH = "./data/conf"
 
 try:
+
+
     # Conf reading
     config = configparser.RawConfigParser()
     config.read('./broker.cfg')
@@ -41,6 +43,8 @@ try:
     for plugin in plugins:
         if plugin != '' and plugin not in config.sections():
             raise Exception("plugin '%s' section missing" % plugin)
+
+    configure_logging()
 
     if 'kubejobs' in plugins:
 

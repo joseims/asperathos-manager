@@ -18,12 +18,13 @@ import shutil
 import socket
 import filecmp
 
-from broker.plugins import base as plugin_base
+from broker.service import plugin_service
 from broker.service import api
 from broker.utils.logger import Log
 from broker.utils.framework import authorizer
 from broker.utils.framework import visualizer
 from broker import exceptions as ex
+from broker.plugins import base as plugin_base
 
 API_LOG = Log("APIv10", "logs/APIv10.log")
 
@@ -32,6 +33,13 @@ clusters = {}
 activated_cluster = None
 
 CLUSTER_CONF_PATH = "./data/clusters"
+
+def install_plugin(data):
+    plugin_repo = data['plugin_repo']
+    installed = plugin_service.install_plugin(plugin_repo)
+    if not installed:
+        return {"message": "Error installing plugin"}, 400
+    return {"message": "Plugin installed successfully"}, 200
 
 
 def run_submission(data):
@@ -54,9 +62,13 @@ def run_submission(data):
             raise ex.UnauthorizedException()
 
     else:
-        if data['plugin'] not in api.plugins:
-            raise ex.BadRequestException()
-        plugin = plugin_base.PLUGINS.get_plugin(data['plugin'])
+        try:
+            plugin = plugin_service.get_plugin(data['plugin'])
+        except Exception as e:
+            if data['plugin'] not in api.plugins:
+                raise ex.BadRequestException()
+            plugin = plugin_base.PLUGINS.get_plugin(data['plugin'])
+
         submission_data = data['plugin_info']
         submission_data['enable_auth'] = data['enable_auth']
         submission_id, executor = plugin.execute(submission_data)
